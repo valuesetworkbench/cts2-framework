@@ -150,8 +150,8 @@ public class AssociationController extends AbstractMessageWrappingController {
 	 * @param entityName the entity name
 	 * @return the children associations of entity
 	 */
-	@RequestMapping(value=PATH_CHILDREN_ASSOCIATIONS_OF_ENTITY, method=RequestMethod.GET)
-	public Object getChildrenAssociationsOfEntity(
+	@RequestMapping(value=PATH_HIERARCHICAL_ASSOCIATIONS_OF_ENTITY, method=RequestMethod.GET)
+	public Object getHierarchicalAssociationsOfEntity(
 			HttpServletRequest httpServletRequest,
 			RestReadContext restReadContext,
 			QueryControl queryControl,
@@ -159,20 +159,22 @@ public class AssociationController extends AbstractMessageWrappingController {
 			RestFilter restFilter,
 			Page page,
 			boolean list,
+			@PathVariable(VAR_HIERARCHYID) String hierarchyId,
 			@PathVariable(VAR_CODESYSTEMID) String codeSystemName,
 			@PathVariable(VAR_CODESYSTEMVERSIONID) String codeSystemVersionId,
 			@PathVariable(VAR_ENTITYID) String entityName) {
 		
-		return this.getChildrenAssociationsOfEntity(
-				httpServletRequest, 
+		return this.getHierarchicalAssociationsOfEntity(
+				httpServletRequest,
 				restReadContext,
 				queryControl,
-				null, 
+				null,
 				restrictions,
-				restFilter, 
-				page, 
-				list, 
-				codeSystemName, 
+				restFilter,
+				page,
+				list,
+				hierarchyId,
+				codeSystemName,
 				codeSystemVersionId,
 				entityName);
 	}
@@ -189,8 +191,8 @@ public class AssociationController extends AbstractMessageWrappingController {
 	 * @param entityName the entity name
 	 * @return the children associations of entity
 	 */
-	@RequestMapping(value=PATH_CHILDREN_ASSOCIATIONS_OF_ENTITY, method=RequestMethod.POST)
-	public Object getChildrenAssociationsOfEntity(
+	@RequestMapping(value=PATH_HIERARCHICAL_ASSOCIATIONS_OF_ENTITY, method=RequestMethod.POST)
+	public Object getHierarchicalAssociationsOfEntity(
 			HttpServletRequest httpServletRequest,
 			RestReadContext restReadContext,
 			QueryControl queryControl,
@@ -199,35 +201,47 @@ public class AssociationController extends AbstractMessageWrappingController {
 			RestFilter restFilter,
 			Page page,
 			boolean list,
+			@PathVariable(VAR_HIERARCHYID) String hierarchyId,
 			@PathVariable(VAR_CODESYSTEMID) String codeSystemName,
 			@PathVariable(VAR_CODESYSTEMVERSIONID) String codeSystemVersionId,
 			@PathVariable(VAR_ENTITYID) String entityName) {
 
 		ResolvedReadContext readContext = this.resolveRestReadContext(restReadContext);
-		
+
 		String codeSystemVersionName = this.codeSystemVersionNameResolver.getCodeSystemVersionNameFromVersionId(
-				codeSystemVersionReadService, 
-				codeSystemName, 
+				codeSystemVersionReadService,
+				codeSystemName,
 				codeSystemVersionId,
 				readContext);
-			
+
 		NameOrURI codeSystemVersionNameOrUri = ModelUtils.nameOrUriFromName(codeSystemVersionName);
-		
-		EntityDescriptionReadId entity = 
+
+		EntityDescriptionReadId entity =
 				new EntityDescriptionReadId(
-						this.getScopedEntityName(entityName, codeSystemName), 
+						this.getScopedEntityName(entityName, codeSystemName),
 						codeSystemVersionNameOrUri);
-		
+
+		HierarchyType hierarchyType;
+		if(hierarchyId.equals(CHILDREN)) {
+			hierarchyType = HierarchyType.CHILDREN;
+		} else if(hierarchyId.equals(ANCESTORS)) {
+			hierarchyType = HierarchyType.ANCESTORS;
+		} else if(hierarchyId.equals(DESCENDANTS)) {
+			hierarchyType = HierarchyType.DESCENDANTS;
+		} else {
+			throw new IllegalStateException();
+		}
+
 		HierarchyRestriction hierarchyRestriction = new HierarchyRestriction();
 		hierarchyRestriction.setEntity(entity);
-		hierarchyRestriction.setHierarchyType(HierarchyType.CHILDREN);
-	
+		hierarchyRestriction.setHierarchyType(hierarchyType);
+
 		restrictions.setHierarchyRestriction(hierarchyRestriction);
 		restrictions.getCodeSystemVersions().add(codeSystemVersionNameOrUri);
-		
-		EntityQueryBuilder builder = 
+
+		EntityQueryBuilder builder =
 				this.getNewEntityQueryBuilder();
-		
+
 		EntityDescriptionQuery resourceQuery = builder.
 				addQuery(query).
 				addRestrictions(restrictions).
@@ -236,17 +250,16 @@ public class AssociationController extends AbstractMessageWrappingController {
 				build();
 
 		return this.doQuery(
-				httpServletRequest, 
-				list, 
+				httpServletRequest,
+				list,
 				this.entityDescriptionQueryService,
-				resourceQuery, 
-				page, 
-				queryControl, 
+				resourceQuery,
+				page,
+				queryControl,
 				EntityDirectory.class,
 				EntityList.class);
-		
 	}
-	
+
 	/**
 	 * Gets the associations of code system version.
 	 *
@@ -875,5 +888,13 @@ public class AssociationController extends AbstractMessageWrappingController {
 	public void setCodeSystemVersionReadService(
 			CodeSystemVersionReadService codeSystemVersionReadService) {
 		this.codeSystemVersionReadService = codeSystemVersionReadService;
+	}
+
+	public EntityDescriptionQueryService getEntityDescriptionQueryService() {
+		return entityDescriptionQueryService;
+	}
+
+	public void setEntityDescriptionQueryService(EntityDescriptionQueryService entityDescriptionQueryService) {
+		this.entityDescriptionQueryService = entityDescriptionQueryService;
 	}
 }

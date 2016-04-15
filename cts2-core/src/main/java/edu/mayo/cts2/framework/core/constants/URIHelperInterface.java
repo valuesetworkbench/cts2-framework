@@ -119,13 +119,9 @@ public interface URIHelperInterface extends PathKeywords, PathVariables,
 	public static final String PATH_GRAPH_OF_CODESYSTEMVERSION = 
 		PATH_CODESYSTEMVERSION_OF_CODESYSTEM_BYID + "/" + GRAPH;
 	
-	public static final String PATH_CHILDREN_ASSOCIATIONS_OF_ENTITY = 
-		PATH_ENTITY_OF_CODESYSTEM_VERSION_BYID + "/" + CHILDREN;
-	public static final String PATH_ANCESTOR_ASSOCIATIONS_OF_ENTITY = 
-		PATH_ENTITY_OF_CODESYSTEM_VERSION_BYID + "/" + ANCESTORS;
-	public static final String PATH_DECENDANT_ASSOCIATIONS_OF_ENTITY = 
-		PATH_ENTITY_OF_CODESYSTEM_VERSION_BYID + "/" + DESCENDANTS;
-	
+	public static final String PATH_HIERARCHICAL_ASSOCIATIONS_OF_ENTITY =
+		PATH_ENTITY_OF_CODESYSTEM_VERSION_BYID + "/{" + VAR_HIERARCHYID + ":" + CHILDREN + "|" + ANCESTORS + "|" + DESCENDANTS + "}";
+
 	public static final String PATH_SUBJECTOF_ASSOCIATIONS_OF_ENTITY = 
 		PATH_ENTITY_OF_CODESYSTEM_VERSION_BYID + "/" + SUBJECTOF;
 	public static final String PATH_TARGETOF_ASSOCIATIONS_OF_ENTITY = 
@@ -332,6 +328,7 @@ interface PathKeywords {
 }
 
 interface PathVariables {
+	public static final String VAR_HIERARCHYID = "hierarchyID";
 	public static final String VAR_ASSOCIATIONID = "associationID";
 	public static final String VAR_CODESYSTEMID = "codeSystemID";
 	public static final String VAR_CODESYSTEMVERSIONID = "codeSystemVersionID";

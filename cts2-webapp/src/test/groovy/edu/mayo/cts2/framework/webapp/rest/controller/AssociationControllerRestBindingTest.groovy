@@ -1,21 +1,19 @@
-package edu.mayo.cts2.framework.webapp.rest.controller;
-
-import static org.junit.Assert.*
-import static org.springframework.test.web.server.request.MockMvcRequestBuilders.*
-import static org.springframework.test.web.server.result.MockMvcResultActions.*
-import static org.springframework.test.web.server.setup.MockMvcBuilders.standaloneSetup
-
-import javax.annotation.Resource
-
-import org.junit.Ignore
-
+package edu.mayo.cts2.framework.webapp.rest.controller
 import edu.mayo.cts2.framework.model.association.Association
 import edu.mayo.cts2.framework.model.core.CodeSystemReference
 import edu.mayo.cts2.framework.model.core.CodeSystemVersionReference
 import edu.mayo.cts2.framework.model.core.NameAndMeaningReference
+import edu.mayo.cts2.framework.model.directory.DirectoryResult
 import edu.mayo.cts2.framework.service.profile.association.AssociationReadService
+import edu.mayo.cts2.framework.service.profile.entitydescription.EntityDescriptionQueryService
+import org.junit.Test
+import org.springframework.test.web.server.setup.MockMvcBuilders
 
-@Ignore("Need to clarify what the expected behavior is.")
+import javax.annotation.Resource
+
+import static org.springframework.test.web.server.request.MockMvcRequestBuilders.get
+import static org.springframework.test.web.server.result.MockMvcResultActions.response
+
 class AssociationControllerRestBindingTest extends ControllerRestBindingTestBase {
 	
 	@Resource
@@ -35,6 +33,36 @@ class AssociationControllerRestBindingTest extends ControllerRestBindingTestBase
 	public getUriToTest() {
 		"http://some/association.org"
 	}
+
+	@Override
+	void testGetByUriWithForward(){}
+
+	@Override
+	void testGetByUriWithRedirect(){}
+
+	@Test
+	void testGetChildren(){
+		MockMvcBuilders
+				.webApplicationContextSetup(context).build()
+				.perform(get("/codesystem/foo/version/1/entity/ns:entityName/children"))
+				.andExpect(response().status().isOk())
+	}
+
+	@Test
+	void testGetDescendants(){
+		MockMvcBuilders
+				.webApplicationContextSetup(context).build()
+				.perform(get("/codesystem/foo/version/1/entity/ns:entityName/descendants"))
+				.andExpect(response().status().isOk())
+	}
+
+	@Test
+	void testGetAncestors(){
+		MockMvcBuilders
+				.webApplicationContextSetup(context).build()
+				.perform(get("/codesystem/foo/version/1/entity/ns:entityName/ancestors"))
+				.andExpect(response().status().isOk())
+	}
 	
 	@Override
 	public initController() {
@@ -49,6 +77,12 @@ class AssociationControllerRestBindingTest extends ControllerRestBindingTestBase
 		] as AssociationReadService;
 	
 		controller.setAssociationReadService(rs);
+
+		controller.setEntityDescriptionQueryService([
+				getResourceSummaries: { query, sortCriteria, page ->
+					new DirectoryResult([], true)
+				}
+		] as EntityDescriptionQueryService)
 		
 		controller
 	}

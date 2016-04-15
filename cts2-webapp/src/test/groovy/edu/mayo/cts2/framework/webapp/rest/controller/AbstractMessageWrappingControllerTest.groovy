@@ -1,4 +1,6 @@
-package edu.mayo.cts2.framework.webapp.rest.controller;
+package edu.mayo.cts2.framework.webapp.rest.controller
+
+import org.springframework.mock.web.MockHttpServletResponse;
 
 import static org.junit.Assert.*
 
@@ -35,6 +37,15 @@ class AbstractMessageWrappingControllerTest {
 		def restResource = controller.getHeadingForNameRequest( httpServletRequest )
 
 		assertNotNull restResource.accessDate	
+	}
+
+	@Test
+	void testLocation(){
+		def httpServletResponse = new MockHttpServletResponse()
+
+		controller.setLocation(httpServletResponse, "test")
+
+		assertEquals "http://test/webapp/test", httpServletResponse.getHeader("Location")
 	}
 	
 	@Test

@@ -407,7 +407,6 @@ public abstract class AbstractMessageWrappingController extends
 		
 		response.setStatus(HttpStatus.NO_CONTENT.value());
 		
-		//TODO: Add a ModelAndView return type
 		return null;
 	}
 	
@@ -436,15 +435,20 @@ public abstract class AbstractMessageWrappingController extends
 		}
 		
 		this.setLocation(response, location);
-		
-		//TODO: Add a ModelAndView return type
+
+		response.setStatus(HttpStatus.CREATED.value());
+
 		return null;
 	}
 	
 	protected void setLocation(HttpServletResponse response, String location){
 		location = StringUtils.removeStart(location, "/");
-		
-		response.setHeader("Location", location);
+
+		String root = this.getServerContext().getServerRootWithAppName();
+
+		root = StringUtils.removeEnd(root, "/");
+
+		response.setHeader("Location", root + "/" + location);
 	}
 
 	protected SortCriteria resolveSort(QueryControl sort, BaseQueryService queryService) {

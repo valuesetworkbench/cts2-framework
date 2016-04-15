@@ -24,7 +24,7 @@ public class UpdateHandler extends AbstractMainenanceHandler {
 			BaseMaintenanceService<T,R,I> service){
 		ChangeableElementGroup group = resource.getChangeableElementGroup();
 
-		if(group == null){
+		if(group == null || (group.getChangeDescription() == null && group.getStatus() == null)) {
 	
 			group = this.createChangeableElementGroup(changeSetUri, ChangeType.UPDATE);
 	

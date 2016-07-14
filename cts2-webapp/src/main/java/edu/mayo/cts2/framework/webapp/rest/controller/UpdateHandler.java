@@ -1,8 +1,5 @@
 package edu.mayo.cts2.framework.webapp.rest.controller;
 
-import org.apache.commons.lang.StringUtils;
-import org.springframework.stereotype.Component;
-
 import edu.mayo.cts2.framework.model.core.ChangeableElementGroup;
 import edu.mayo.cts2.framework.model.core.IsChangeable;
 import edu.mayo.cts2.framework.model.core.OpaqueData;
@@ -13,6 +10,10 @@ import edu.mayo.cts2.framework.model.service.exception.UnknownChangeSet;
 import edu.mayo.cts2.framework.model.util.ModelUtils;
 import edu.mayo.cts2.framework.service.profile.BaseMaintenanceService;
 import edu.mayo.cts2.framework.service.profile.UpdateChangeableMetadataRequest;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
 
 @Component
 public class UpdateHandler extends AbstractMainenanceHandler {
@@ -44,6 +45,10 @@ public class UpdateHandler extends AbstractMainenanceHandler {
 					"A 'ContainingChangeSet' is required to UPDATE a Resource. Please supply one and retry your request."));
 		
 			throw ex;
+		}
+
+		if(group.getChangeDescription().getChangeDate() == null) {
+			group.getChangeDescription().setChangeDate(new Date());
 		}
 		
 		ChangeType type = group.getChangeDescription().getChangeType();

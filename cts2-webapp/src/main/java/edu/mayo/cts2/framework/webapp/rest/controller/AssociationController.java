@@ -288,18 +288,18 @@ public class AssociationController extends AbstractMessageWrappingController {
 		String codeSystemVersionName = 
 				codeSystemVersionNameResolver.getCodeSystemVersionNameFromVersionId(
 						this.codeSystemVersionReadService,
-						codeSystemName, 
+						codeSystemName,
 						versionId,
 						readContext);
 		
 		associationRestrictions.setCodeSystemVersion(ModelUtils.nameOrUriFromName(codeSystemVersionName));
 		
 		return this.getAssociations(
-				httpServletRequest, 
+				httpServletRequest,
 				restReadContext,
 				queryControl,
-				restFilter, 
-				associationRestrictions, 
+				restFilter,
+				associationRestrictions,
 				page,
 				list);
 	}
@@ -336,12 +336,12 @@ public class AssociationController extends AbstractMessageWrappingController {
 		
 		return this.doQuery(
 				httpServletRequest,
-				list, 
+				list,
 				this.associationQueryService,
 				resourceQuery,
-				page, 
+				page,
 				queryControl,
-				AssociationDirectory.class, 
+				AssociationDirectory.class,
 				AssociationList.class);
 	}
 
@@ -366,12 +366,12 @@ public class AssociationController extends AbstractMessageWrappingController {
 		
 		return 
 				this.getAssociations(
-						httpServletRequest, 
+						httpServletRequest,
 						restReadContext,
 						queryControl,
 						null,
 						restFilter,
-						associationRestrictions, 
+						associationRestrictions,
 						page,
 						list);
 	}
@@ -392,7 +392,7 @@ public class AssociationController extends AbstractMessageWrappingController {
 				restReadContext,
 				UnknownAssociation.class,
 				new AssociationReadId(
-						associationLocalName, 
+						associationLocalName,
 						ModelUtils.nameOrUriFromName(codeSystemVersionName)));
 	}
 	
@@ -424,18 +424,42 @@ public class AssociationController extends AbstractMessageWrappingController {
 			@RequestParam(value="redirect", defaultValue=DEFAULT_REDIRECT) boolean redirect) {
 	
 		return this.doReadByUri(
-				httpServletRequest, 
-				MESSAGE_FACTORY, 
+				httpServletRequest,
+				MESSAGE_FACTORY,
 				PATH_ASSOCIATIONBYURI,
-				PATH_ASSOCIATIONBYID, 
-				URL_BINDER, 
+				PATH_ASSOCIATIONBYID,
+				URL_BINDER,
 				this.associationReadService,
 				restReadContext,
 				UnknownAssociation.class,
-				new AssociationReadId(uri), 
+				new AssociationReadId(uri),
 				redirect);
 	}
-	
+
+	@RequestMapping(value=PATH_GRAPH_OF_ENTITY, method=RequestMethod.GET)
+	public Object getGraphEntity(
+			HttpServletRequest httpServletRequest,
+			RestReadContext restReadContext,
+			AssociationQueryServiceRestrictions associationRestrictions,
+			Page page,
+			@PathVariable(VAR_CODESYSTEMID) String codeSystemName,
+			@PathVariable(VAR_CODESYSTEMVERSIONID) String codeSystemVersionId,
+			@PathVariable(VAR_ENTITYID) String focus,
+			@RequestParam(required=true, defaultValue="FORWARD") GraphDirection direction,
+			@RequestParam(required=true, defaultValue="1") int depth) {
+
+		return this.getGraphCodeSystemVersion(
+				httpServletRequest,
+				restReadContext,
+				associationRestrictions,
+				page,
+				codeSystemName,
+				codeSystemVersionId,
+				focus,
+				direction,
+				depth);
+	}
+
 	/**
 	 * Gets the graph code system version.
 	 *

@@ -194,9 +194,9 @@ public class MapVersionController extends AbstractMessageWrappingController {
 	
 		return this.doUpdate(
 				httpServletResponse,
-				mapVersion, 
+				mapVersion,
 				changeseturi,
-				ModelUtils.nameOrUriFromName(mapVersionName), 
+				ModelUtils.nameOrUriFromName(mapVersionName),
 				this.mapVersionMaintenanceService);
 	}
 	
@@ -212,7 +212,7 @@ public class MapVersionController extends AbstractMessageWrappingController {
 				mapVersion,
 				changeseturi,
 				PATH_MAPVERSION_OF_MAP_BYID,
-				URL_BINDER, 
+				URL_BINDER,
 				this.mapVersionMaintenanceService);
 	}
 
@@ -225,10 +225,10 @@ public class MapVersionController extends AbstractMessageWrappingController {
 			@RequestParam(PARAM_CHANGESETCONTEXT) String changeseturi) {
 
 			return this.doDelete(httpServletResponse,
-				ModelUtils.nameOrUriFromName(
-						mapVersionName), 
-						changeseturi, 
-						this.mapVersionMaintenanceService);
+					ModelUtils.nameOrUriFromName(
+							mapVersionName),
+					changeseturi,
+					this.mapVersionMaintenanceService);
 	}
 	/**
 	 * Gets the map versions of map.
@@ -253,10 +253,10 @@ public class MapVersionController extends AbstractMessageWrappingController {
 			@PathVariable(VAR_MAPID) String mapName) {
 		
 		return this.getMapVersionsOfMap(
-				httpServletRequest, 
+				httpServletRequest,
 				restReadContext,
 				queryControl,
-				null, 
+				null,
 				restrictions,
 				restFilter,
 				page,
@@ -292,10 +292,10 @@ public class MapVersionController extends AbstractMessageWrappingController {
 		
 		return this.getMapVersions(
 				httpServletRequest,
-				restReadContext, 
-				queryControl, 
+				restReadContext,
+				queryControl,
 				query,
-				restrictions, 
+				restrictions,
 				restFilter,
 				page,
 				list);
@@ -365,12 +365,12 @@ public class MapVersionController extends AbstractMessageWrappingController {
 		
 		return this.doQuery(
 				httpServletRequest,
-				list, 
+				list,
 				this.mapVersionQueryService,
 				resourceQuery,
-				page, 
+				page,
 				queryControl,
-				MapVersionDirectory.class, 
+				MapVersionDirectory.class,
 				MapVersionList.class);
 	}
 	
@@ -418,9 +418,9 @@ public class MapVersionController extends AbstractMessageWrappingController {
 		restrictions.setMap(ModelUtils.nameOrUriFromEither(mapId));
 		
 		this.getMapVersionsCount(
-				httpServletResponse, 
-				restReadContext, 
-				restrictions, 
+				httpServletResponse,
+				restReadContext,
+				restrictions,
 				restFilter);
 	}
 	
@@ -482,6 +482,29 @@ public class MapVersionController extends AbstractMessageWrappingController {
 				this.mapVersionReadService, 
 				restReadContext,
 				UnknownMapVersion.class,
+				ModelUtils.nameOrUriFromName(mapVersionName));
+	}
+
+	@RequestMapping(value={
+			PATH_MAPVERSION_OF_MAP_BYID
+			},
+			method=RequestMethod.POST)
+	public Object cloneMapVersion(
+			HttpServletRequest httpServletRequest,
+			HttpServletResponse httpServletResponse,
+			RestReadContext restReadContext,
+			@PathVariable(VAR_MAPID) String mapName,
+			@PathVariable(VAR_MAPVERSIONID) String mapVersionName,
+			@RequestParam(value=PARAM_CHANGESETCONTEXT, required=false) String changeseturi,
+			@RequestBody MapVersion mapVersion) {
+
+		return this.doClone(
+				httpServletResponse,
+				mapVersion,
+				changeseturi,
+				PATH_MAPVERSION_OF_MAP_BYID,
+				URL_BINDER,
+				this.mapVersionMaintenanceService,
 				ModelUtils.nameOrUriFromName(mapVersionName));
 	}
 	

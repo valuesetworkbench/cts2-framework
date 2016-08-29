@@ -27,13 +27,24 @@ import edu.mayo.cts2.framework.core.config.ServerContext;
 import edu.mayo.cts2.framework.core.constants.URIHelperInterface;
 import edu.mayo.cts2.framework.model.command.Page;
 import edu.mayo.cts2.framework.model.command.ResolvedReadContext;
-import edu.mayo.cts2.framework.model.core.*;
+import edu.mayo.cts2.framework.model.core.ComponentReference;
+import edu.mayo.cts2.framework.model.core.Directory;
+import edu.mayo.cts2.framework.model.core.IsChangeable;
+import edu.mayo.cts2.framework.model.core.Message;
+import edu.mayo.cts2.framework.model.core.Parameter;
+import edu.mayo.cts2.framework.model.core.RESTResource;
+import edu.mayo.cts2.framework.model.core.SortCriteria;
+import edu.mayo.cts2.framework.model.core.SortCriterion;
 import edu.mayo.cts2.framework.model.core.types.CompleteDirectory;
 import edu.mayo.cts2.framework.model.core.types.SortDirection;
 import edu.mayo.cts2.framework.model.directory.DirectoryResult;
 import edu.mayo.cts2.framework.model.exception.ExceptionFactory;
 import edu.mayo.cts2.framework.model.service.exception.UnknownResourceReference;
-import edu.mayo.cts2.framework.service.profile.*;
+import edu.mayo.cts2.framework.service.profile.BaseMaintenanceService;
+import edu.mayo.cts2.framework.service.profile.BaseQueryService;
+import edu.mayo.cts2.framework.service.profile.QueryService;
+import edu.mayo.cts2.framework.service.profile.ReadService;
+import edu.mayo.cts2.framework.service.profile.ResourceQuery;
 import edu.mayo.cts2.framework.webapp.rest.command.QueryControl;
 import edu.mayo.cts2.framework.webapp.rest.command.RestReadContext;
 import edu.mayo.cts2.framework.webapp.rest.exception.StatusSettingCts2RestException;
@@ -57,8 +68,15 @@ import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Field;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * An Abstract Spring MVC Controller to handle various common CTS2 functionality such as
@@ -400,9 +418,9 @@ public abstract class AbstractMessageWrappingController extends
 			BaseMaintenanceService<T,R,I> service) {
 		
 		this.updateHandler.update(
-				resource, 
-				changeSetUri, 
-				identifier, 
+				resource,
+				changeSetUri,
+				identifier,
 				service);
 		
 		response.setStatus(HttpStatus.NO_CONTENT.value());
@@ -412,8 +430,8 @@ public abstract class AbstractMessageWrappingController extends
 	
 	protected <T extends IsChangeable,R extends IsChangeable> Object doCreate(
 			HttpServletResponse response,
-			R resource, 
-			String changeSetUri, 
+			R resource,
+			String changeSetUri,
 			String urlTemplate,
 			UrlTemplateBinder<T> template,
 			BaseMaintenanceService<T,R,?> service){
@@ -440,7 +458,34 @@ public abstract class AbstractMessageWrappingController extends
 
 		return null;
 	}
-	
+
+	protected <T extends IsChangeable,R extends IsChangeable,I> Object doClone(
+			HttpServletResponse response,
+			R resource,
+			String changeSetUri,
+			String urlTemplate,
+			UrlTemplateBinder<T> template,
+			BaseMaintenanceService<T, R, I> service,
+			I identifier){
+
+		T returnedResource = service.cloneResource(identifier, resource);
+
+		String location = this.urlTemplateBindingCreator.bindResourceToUrlTemplate(
+				template,
+				returnedResource,
+				urlTemplate);
+
+		if(StringUtils.isNotBlank(changeSetUri)){
+			location = location + ("?" + URIHelperInterface.PARAM_CHANGESETCONTEXT + "=" +  changeSetUri);
+		}
+
+		this.setLocation(response, location);
+
+		response.setStatus(HttpStatus.CREATED.value());
+
+		return null;
+	}
+
 	protected void setLocation(HttpServletResponse response, String location){
 		location = StringUtils.removeStart(location, "/");
 

@@ -72,6 +72,16 @@ public interface BaseMaintenanceService<
 	 * @return The actual resource created and persisted by the service.
 	 */
 	public T createResource(R resource);
+
+	/**
+	 * Clones the dependencies of the resource identified by {@code resourceToClone} into the
+	 * new resource {@code newResource}.
+	 *
+	 * @param resourceToClone
+	 * @param newResource
+	 * @return
+	 */
+	public T cloneResource(I resourceToClone, R newResource);
 	
 	/**
 	 * Deletes the Resource identified by the identifier in the ChangeSet identified by the

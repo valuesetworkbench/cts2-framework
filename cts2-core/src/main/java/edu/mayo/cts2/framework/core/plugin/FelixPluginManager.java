@@ -142,6 +142,7 @@ public class FelixPluginManager implements
 	 */
 	protected void autodeployBundles(File pluginDirectory) throws IOException{
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+		resolver.setPathMatcher(new edu.mayo.cts2.framework.core.plugin.AntPathMatcher());
 		
 		for(org.springframework.core.io.Resource resource : 
 			resolver.getResources("classpath:/autodeployBundles/*.jar")){

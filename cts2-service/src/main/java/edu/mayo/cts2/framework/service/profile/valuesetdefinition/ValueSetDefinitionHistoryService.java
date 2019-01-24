@@ -28,6 +28,7 @@ import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinition;
 import edu.mayo.cts2.framework.service.profile.Cts2Profile;
 import edu.mayo.cts2.framework.service.profile.HistoryService;
 import edu.mayo.cts2.framework.service.profile.StructuralConformance;
+import edu.mayo.cts2.framework.service.profile.valuesetdefinition.name.ValueSetDefinitionReadId;
 
 /**
  * The Interface ValueSetDefinitionHistoryService.
@@ -36,5 +37,5 @@ import edu.mayo.cts2.framework.service.profile.StructuralConformance;
  */
 @StructuralConformance(StructuralProfile.SP_VALUE_SET_DEFINITION)
 public interface ValueSetDefinitionHistoryService extends
-		HistoryService<ValueSetDefinition,String>, Cts2Profile {
+		HistoryService<ValueSetDefinition, ValueSetDefinitionReadId>, Cts2Profile {
 }

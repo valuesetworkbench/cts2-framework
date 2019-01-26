@@ -1,5 +1,11 @@
 package edu.mayo.cts2.framework.core.config;
 
+import edu.mayo.cts2.framework.core.config.option.OptionHolder;
+import edu.mayo.cts2.framework.core.config.option.StringOption;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.lang.text.StrSubstitutor;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -8,14 +14,10 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
-
-import edu.mayo.cts2.framework.core.config.option.OptionHolder;
-import edu.mayo.cts2.framework.core.config.option.StringOption;
-
 public class ConfigUtils {
-	
+
+	private static final StrSubstitutor STR_SUBSTITUTOR = new StrSubstitutor(System.getenv());
+
 	public static OptionHolder propertiesToOptionHolder(Properties properties){
 		Set<StringOption> stringOptions = new HashSet<StringOption>();
 		
@@ -99,7 +101,15 @@ public class ConfigUtils {
 			}
 		}
 
-		return props;
+		return resolveEnvironmentVariables(props);
+	}
+
+	protected static Properties resolveEnvironmentVariables(Properties properties) {
+		for(Object key : properties.keySet()) {
+			properties.put(key, STR_SUBSTITUTOR.replace(properties.get(key)));
+		}
+
+		return properties;
 	}
 	
 	protected static void addProperty(String propertyName, String propertyValue, File propsFile) {

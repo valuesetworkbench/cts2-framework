@@ -226,6 +226,8 @@ public interface URIHelperInterface extends PathKeywords, PathVariables,
 	public static final String PATH_VALIDATEENTITYINVALUESET = "/" + VALUESET
 			+ "/{" + VAR_VALUESETID + "}/" + ENTITIES + "/" + EXISTINGENTITYIDS;
 
+	public static final String PATH_VALUESETDEFINITION_CHANGEHISTORY = PATH_VALUESETDEFINITION_OF_VALUESET_BYID + "/" + CHANGEHISTORY;
+
 	/* Services */
 	public static final String PATH_SERVICE = SERVICE + "/{" + VAR_SERVICEID + "}";
 }

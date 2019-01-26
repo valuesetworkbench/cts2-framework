@@ -26,6 +26,7 @@ package edu.mayo.cts2.framework.webapp.rest.controller;
 import edu.mayo.cts2.framework.model.command.Page;
 import edu.mayo.cts2.framework.model.core.Message;
 import edu.mayo.cts2.framework.model.core.VersionTagReference;
+import edu.mayo.cts2.framework.model.directory.DirectoryResult;
 import edu.mayo.cts2.framework.model.extension.LocalIdValueSetDefinition;
 import edu.mayo.cts2.framework.model.service.core.Query;
 import edu.mayo.cts2.framework.model.service.exception.UnknownValueSetDefinition;
@@ -35,14 +36,12 @@ import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinitionDirect
 import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinitionList;
 import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinitionMsg;
 import edu.mayo.cts2.framework.service.command.restriction.ValueSetDefinitionQueryServiceRestrictions;
-import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ValueSetDefinitionMaintenanceService;
-import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ValueSetDefinitionQuery;
-import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ValueSetDefinitionQueryService;
-import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ValueSetDefinitionReadService;
+import edu.mayo.cts2.framework.service.profile.valuesetdefinition.*;
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.name.ValueSetDefinitionReadId;
 import edu.mayo.cts2.framework.webapp.naming.TagResolver;
 import edu.mayo.cts2.framework.webapp.rest.command.QueryControl;
 import edu.mayo.cts2.framework.webapp.rest.command.RestFilter;
+import edu.mayo.cts2.framework.webapp.rest.command.RestFilters;
 import edu.mayo.cts2.framework.webapp.rest.command.RestReadContext;
 import edu.mayo.cts2.framework.webapp.rest.query.ValueSetDefinitionQueryBuilder;
 import org.apache.commons.lang.StringUtils;
@@ -54,6 +53,7 @@ import org.springframework.web.util.UrlPathHelper;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,6 +74,9 @@ public class ValueSetDefinitionController extends AbstractMessageWrappingControl
 	@Cts2Service
 	private ValueSetDefinitionMaintenanceService valueSetDefinitionMaintenanceService;
 	
+	@Cts2Service
+	private ValueSetDefinitionHistoryService valueSetDefinitionHistoryService;
+
 	@Resource
 	private TagResolver tagResolver;
 
@@ -121,7 +124,7 @@ public class ValueSetDefinitionController extends AbstractMessageWrappingControl
 			RestReadContext restReadContext,
 			QueryControl queryControl,
 			ValueSetDefinitionQueryServiceRestrictions restrictions,
-			RestFilter restFilter,
+			RestFilters restFilters,
 			Page page,
 			boolean list,
 			@PathVariable(VAR_VALUESETID) String valueSet) {
@@ -132,7 +135,7 @@ public class ValueSetDefinitionController extends AbstractMessageWrappingControl
 				queryControl,
 				null,
 				restrictions,
-				restFilter,
+				restFilters,
 				page, 
 				list,
 				valueSet);
@@ -157,7 +160,7 @@ public class ValueSetDefinitionController extends AbstractMessageWrappingControl
 			QueryControl queryControl,
 			@RequestBody Query query,
 			ValueSetDefinitionQueryServiceRestrictions restrictions,
-			RestFilter restFilter,
+			RestFilters restFilters,
 			Page page,
 			boolean list,
 			@PathVariable(VAR_VALUESETID) String valueSet) {
@@ -170,7 +173,7 @@ public class ValueSetDefinitionController extends AbstractMessageWrappingControl
 				queryControl,
 				query, 
 				restrictions, 
-				restFilter,
+				restFilters,
 				page,
 				list);
 	}
@@ -209,7 +212,7 @@ public class ValueSetDefinitionController extends AbstractMessageWrappingControl
 			HttpServletResponse httpServletResponse,
 			RestReadContext restReadContext,
 			ValueSetDefinitionQueryServiceRestrictions restrictions,
-			RestFilter restFilter,
+			RestFilter restFilters,
 			@PathVariable(VAR_VALUESETID) String valueSet) {
 		
 		restrictions.setValueSet(ModelUtils.nameOrUriFromEither(valueSet));
@@ -218,7 +221,7 @@ public class ValueSetDefinitionController extends AbstractMessageWrappingControl
 				httpServletResponse,
 				restReadContext,
 				restrictions, 
-				restFilter);
+				restFilters);
 	}
 	
 	@RequestMapping(value={
@@ -228,7 +231,7 @@ public class ValueSetDefinitionController extends AbstractMessageWrappingControl
 			RestReadContext restReadContext,
 			QueryControl queryControl,
 			ValueSetDefinitionQueryServiceRestrictions restrictions,
-			RestFilter restFilter,
+			RestFilters restFilters,
 			Page page,
 			boolean list) {
 		
@@ -238,7 +241,7 @@ public class ValueSetDefinitionController extends AbstractMessageWrappingControl
 				queryControl,
 				null,
 				restrictions,
-				restFilter,
+				restFilters,
 				page,
 				list);
 	}
@@ -261,7 +264,7 @@ public class ValueSetDefinitionController extends AbstractMessageWrappingControl
 			QueryControl queryControl,
 			@RequestBody Query query,
 			ValueSetDefinitionQueryServiceRestrictions restrictions,
-			RestFilter restFilter,
+			RestFilters restFilters,
 			Page page,
 			boolean list) {
 		
@@ -269,7 +272,7 @@ public class ValueSetDefinitionController extends AbstractMessageWrappingControl
 		
 		ValueSetDefinitionQuery resourceQuery = builder.
 				addQuery(query).
-				addRestFilter(restFilter).
+				addRestFilters(restFilters).
 				addRestrictions(restrictions).
 				addRestReadContext(restReadContext).
 				build();
@@ -484,12 +487,40 @@ public class ValueSetDefinitionController extends AbstractMessageWrappingControl
 						ModelUtils.nameOrUriFromName(valueSetName));
 			
 		return this.doDelete(
-				httpServletResponse, 
+				httpServletResponse,
 				id,
 				changeseturi,
 				this.valueSetDefinitionMaintenanceService);
 	}
 	
+	@RequestMapping(value=PATH_VALUESETDEFINITION_CHANGEHISTORY, method=RequestMethod.GET)
+	@ResponseBody
+	public ValueSetDefinitionList getChangeHistory(
+			HttpServletRequest httpServletRequest,
+			@PathVariable(VAR_VALUESETID) String valueSetName,
+			@PathVariable(VAR_VALUESETDEFINITIONID) String valueSetDefinitionLocalId,
+			@RequestParam(required=false) Date PARAM_FROMDATE,
+			@RequestParam(required=false) Date PARAM_TODATE,
+			Page page) {
+
+		ValueSetDefinitionReadId id =
+				new ValueSetDefinitionReadId(
+						valueSetDefinitionLocalId,
+						ModelUtils.nameOrUriFromName(valueSetName));
+
+		DirectoryResult<ValueSetDefinition> result =
+				this.valueSetDefinitionHistoryService.getChangeHistory(
+						id,
+						PARAM_FROMDATE,
+						PARAM_TODATE);
+
+		return this.populateDirectory(
+				result,
+				page,
+				httpServletRequest,
+				ValueSetDefinitionList.class);
+	}
+
 	private ValueSetDefinitionQueryBuilder getNewResourceQueryBuilder(){
 		return new ValueSetDefinitionQueryBuilder(
 			this.valueSetDefinitionQueryService, 
